@@ -18,5 +18,6 @@
 
 void Shell_Init(void);
 void Shell_Loop(void);
+void setPWM(int dutycycle);
 
 #endif /* INC_MYLIBS_SHELL_H_ */

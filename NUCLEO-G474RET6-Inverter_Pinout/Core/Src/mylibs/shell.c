@@ -6,8 +6,12 @@
  */
 #include "usart.h"
 #include "mylibs/shell.h"
+#include "stm32g4xx_hal.h"
+
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
+#include "tim.h"
 
 uint8_t prompt[]="user@Nucleo-STM32G474RET6>>";
 uint8_t started[]=
@@ -29,6 +33,7 @@ char* 		argv[MAX_ARGS];
 int		 	argc = 0;
 char*		token;
 int 		newCmdReady = 0;
+
 
 void Shell_Init(void){
 	memset(argv, 0, MAX_ARGS*sizeof(char*));
@@ -76,6 +81,35 @@ void Shell_Loop(void){
 			int uartTxStringLength = snprintf((char *)uartTxBuffer, UART_TX_BUFFER_SIZE, "Print all available functions here\r\n");
 			HAL_UART_Transmit(&huart2, uartTxBuffer, uartTxStringLength, HAL_MAX_DELAY);
 		}
+
+		else if(strcmp(argv[0],"start")==0){
+			int uartTxStringLength = snprintf((char *)uartTxBuffer, UART_TX_BUFFER_SIZE, "Power on\r\n");
+			HAL_UART_Transmit(&huart2, uartTxBuffer, uartTxStringLength, HAL_MAX_DELAY);
+			HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_1);
+			HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_1);
+			HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_2);
+			HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_2);
+			setPWM(50);
+		}
+		else if(strcmp(argv[0],"stop")==0){
+			int uartTxStringLength = snprintf((char *)uartTxBuffer, UART_TX_BUFFER_SIZE, "Power off\r\n");
+			HAL_UART_Transmit(&huart2, uartTxBuffer, uartTxStringLength, HAL_MAX_DELAY);
+			HAL_TIM_PWM_Stop(&htim1,TIM_CHANNEL_1);
+			HAL_TIMEx_PWMN_Stop(&htim1, TIM_CHANNEL_1);
+			HAL_TIM_PWM_Stop(&htim1,TIM_CHANNEL_2);
+			HAL_TIMEx_PWMN_Stop(&htim1, TIM_CHANNEL_2);
+		}
+
+		else if(argc == 2 && strcmp(argv[0], "speed") == 0){
+			int percentage = atoi(argv[1]);  // Convertit l'argument en pourcentage
+			if(percentage>=0 && percentage<=100){
+				setPWM(percentage);
+			}
+			else{
+				int uartTxStringLength = snprintf((char *)uartTxBuffer, UART_TX_BUFFER_SIZE, "Value must be between 0 and 100\r\n");
+				HAL_UART_Transmit(&huart2, uartTxBuffer, uartTxStringLength, HAL_MAX_DELAY);
+			}
+		}
 		else{
 			HAL_UART_Transmit(&huart2, cmdNotFound, sizeof(cmdNotFound), HAL_MAX_DELAY);
 		}
@@ -88,3 +122,10 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef * huart){
 	uartRxReceived = 1;
 	HAL_UART_Receive_IT(&huart2, uartRxBuffer, UART_RX_BUFFER_SIZE);
 }
+
+void setPWM(int dutycycle){
+	int val_CCR = (TIM1->ARR*dutycycle)/100;
+	TIM1->CCR1=val_CCR;
+	TIM1->CCR2=TIM1->ARR-val_CCR;
+}
+

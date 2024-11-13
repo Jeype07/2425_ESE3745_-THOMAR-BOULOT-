@@ -1,3 +1,4 @@
-../Core/Src/mylibs/shell.c:33:6:Shell_Init	8	static
-../Core/Src/mylibs/shell.c:44:6:Shell_Loop	16	static
-../Core/Src/mylibs/shell.c:87:6:HAL_UART_RxCpltCallback	16	static
+../Core/Src/mylibs/shell.c:38:6:Shell_Init	8	static
+../Core/Src/mylibs/shell.c:49:6:Shell_Loop	32	static
+../Core/Src/mylibs/shell.c:121:6:HAL_UART_RxCpltCallback	16	static
+../Core/Src/mylibs/shell.c:126:6:setPWM	24	static
