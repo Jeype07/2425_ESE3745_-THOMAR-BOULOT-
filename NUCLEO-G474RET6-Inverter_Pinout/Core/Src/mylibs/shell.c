@@ -31,10 +31,10 @@ char*		token;
 int 		newCmdReady = 0;
 
 void Shell_Init(void){
-	memset(argv, NULL, MAX_ARGS*sizeof(char*));
-	memset(cmdBuffer, NULL, CMD_BUFFER_SIZE*sizeof(char));
-	memset(uartRxBuffer, NULL, UART_RX_BUFFER_SIZE*sizeof(char));
-	memset(uartTxBuffer, NULL, UART_TX_BUFFER_SIZE*sizeof(char));
+	memset(argv, 0, MAX_ARGS*sizeof(char*));
+	memset(cmdBuffer, 0, CMD_BUFFER_SIZE*sizeof(char));
+	memset(uartRxBuffer, 0, UART_RX_BUFFER_SIZE*sizeof(char));
+	memset(uartTxBuffer, 0, UART_TX_BUFFER_SIZE*sizeof(char));
 
 	HAL_UART_Receive_IT(&huart2, uartRxBuffer, UART_RX_BUFFER_SIZE);
 	HAL_UART_Transmit(&huart2, started, strlen((char *)started), HAL_MAX_DELAY);
