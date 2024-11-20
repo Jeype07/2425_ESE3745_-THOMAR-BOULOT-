@@ -19,6 +19,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "adc.h"
+#include "dma.h"
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
@@ -46,7 +47,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-
+uint32_t value_adc;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -57,8 +58,10 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-// Fonction pour démarrer les PWM sur les 4 canaux
-
+int __io_putchar(int ch) {
+	HAL_UART_Transmit(&huart2, (uint8_t *)&ch, 1, HAL_MAX_DELAY);
+	return ch;
+}
 /* USER CODE END 0 */
 
 /**
@@ -89,6 +92,7 @@ int main(void)
 
 	/* Initialize all configured peripherals */
 	MX_GPIO_Init();
+	MX_DMA_Init();
 	MX_ADC2_Init();
 	MX_ADC1_Init();
 	MX_TIM1_Init();
@@ -98,6 +102,14 @@ int main(void)
 	/* USER CODE BEGIN 2 */
 
 	Shell_Init();
+	HAL_ADC_Start_DMA(&hadc1,(uint32_t*)&value_adc,1);
+
+	uint32_t adc_buffer[1]; // Tableau pour stocker les données ADC
+	float current_value = 0.0f; // Stocke la valeur calculée du courant
+
+	#define R_SHUNT 0.1f // Résistance de shunt en ohms
+	#define V_REF 3.3f   // Tension de référence de l'ADC
+	#define ADC_RESOLUTION 4096.0f // Résolution ADC 12 bits
 	/* USER CODE END 2 */
 
 	/* Infinite loop */
@@ -105,8 +117,11 @@ int main(void)
 	while (1)
 	{
 		Shell_Loop();
+		float voltage = (adc_buffer[0] * V_REF) / ADC_RESOLUTION;
+		current_value = voltage / R_SHUNT;
 
-
+		// Afficher ou utiliser `current_value` ici
+		HAL_Delay(500);
 		/* USER CODE END WHILE */
 
 		/* USER CODE BEGIN 3 */

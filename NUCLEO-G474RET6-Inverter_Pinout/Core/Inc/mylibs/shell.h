@@ -16,6 +16,8 @@
 #define ASCII_CR 0x0D			// CR = carriage return, retour chariot
 #define ASCII_BACK 0x08			// BACK = Backspace
 
+#define NULL_SPEED 50
+
 void Shell_Init(void);
 void Shell_Loop(void);
 void setPWM(int dutycycle);

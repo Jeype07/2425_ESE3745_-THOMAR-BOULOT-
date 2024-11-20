@@ -38,6 +38,7 @@ int 		nbcommand = 4;
 int 		pas = 1;
 int 		delai = 100;
 int 		trigger = 50; //valeur du rapport après start
+int 		percentage;
 
 void Shell_Init(void){
 	memset(argv, 0, MAX_ARGS*sizeof(char*));
@@ -102,11 +103,24 @@ void Shell_Loop(void){
 			HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_1);
 			HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_2);
 			HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_2);
-			setPWM(50);
+			setPWM(NULL_SPEED);
 		}
 		else if(strcmp(argv[0],"stop")==0){
 			int uartTxStringLength = snprintf((char *)uartTxBuffer, UART_TX_BUFFER_SIZE, "Power off\r\n");
 			HAL_UART_Transmit(&huart2, uartTxBuffer, uartTxStringLength, HAL_MAX_DELAY);
+			if(percentage != NULL_SPEED){
+				while(percentage != NULL_SPEED){
+					if(percentage > NULL_SPEED){
+						percentage -= pas;
+						setPWM(percentage);
+					}
+					else{
+						percentage += pas;
+						setPWM(percentage);
+					}
+					HAL_Delay(delai);
+				}
+			}
 			HAL_TIM_PWM_Stop(&htim1,TIM_CHANNEL_1);
 			HAL_TIMEx_PWMN_Stop(&htim1, TIM_CHANNEL_1);
 			HAL_TIM_PWM_Stop(&htim1,TIM_CHANNEL_2);
@@ -114,12 +128,11 @@ void Shell_Loop(void){
 		}
 
 		else if(argc == 2 && strcmp(argv[0], "speed") == 0){
-			int percentage = atoi(argv[1]);  // Convertit l'argument en pourcentage
+			percentage = atoi(argv[1]);  // Convertit l'argument en pourcentage
+
 			if(percentage>=0 && percentage<=100){
 
-
 				while(trigger!=percentage){
-					HAL_Delay(delai);
 					if(trigger>percentage){
 						trigger -= pas;
 						setPWM(trigger);
@@ -128,8 +141,8 @@ void Shell_Loop(void){
 						trigger += pas;
 						setPWM(trigger);
 					}
+					HAL_Delay(delai);
 				}
-
 			}
 			else{
 				int uartTxStringLength = snprintf((char *)uartTxBuffer, UART_TX_BUFFER_SIZE, "Value must be between 0 and 100\r\n");
@@ -147,6 +160,16 @@ void Shell_Loop(void){
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef * huart){
 	uartRxReceived = 1;
 	HAL_UART_Receive_IT(&huart2, uartRxBuffer, UART_RX_BUFFER_SIZE);
+}
+
+void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc)
+{
+  /* Prevent unused argument(s) compilation warning */
+	adc_val = buffer;
+
+  /* NOTE : This function should not be modified. When the callback is needed,
+            function HAL_ADC_ConvCpltCallback must be implemented in the user file.
+   */
 }
 
 void setPWM(int dutycycle){
