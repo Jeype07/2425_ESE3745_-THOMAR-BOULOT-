@@ -33,7 +33,11 @@ char* 		argv[MAX_ARGS];
 int		 	argc = 0;
 char*		token;
 int 		newCmdReady = 0;
-
+char* 		command[4] = {"WhereisBrian?","start","stop","speed"};
+int 		nbcommand = 4;
+int 		pas = 1;
+int 		delai = 100;
+int 		trigger = 50; //valeur du rapport après start
 
 void Shell_Init(void){
 	memset(argv, 0, MAX_ARGS*sizeof(char*));
@@ -78,8 +82,17 @@ void Shell_Loop(void){
 			HAL_UART_Transmit(&huart2, brian, sizeof(brian), HAL_MAX_DELAY);
 		}
 		else if(strcmp(argv[0],"help")==0){
+
 			int uartTxStringLength = snprintf((char *)uartTxBuffer, UART_TX_BUFFER_SIZE, "Print all available functions here\r\n");
 			HAL_UART_Transmit(&huart2, uartTxBuffer, uartTxStringLength, HAL_MAX_DELAY);
+
+			for (size_t i = 0; i < nbcommand; i++) {
+				// Convertir l'élément du tableau en chaîne de caractères
+				int uartTxStringLength = snprintf((char *)uartTxBuffer, UART_TX_BUFFER_SIZE, "%s\r\n", command[i]);
+				// Transmettre le texte via UART
+				HAL_UART_Transmit(&huart2, uartTxBuffer, uartTxStringLength, HAL_MAX_DELAY);
+			}
+
 		}
 
 		else if(strcmp(argv[0],"start")==0){
@@ -103,7 +116,20 @@ void Shell_Loop(void){
 		else if(argc == 2 && strcmp(argv[0], "speed") == 0){
 			int percentage = atoi(argv[1]);  // Convertit l'argument en pourcentage
 			if(percentage>=0 && percentage<=100){
-				setPWM(percentage);
+
+
+				while(trigger!=percentage){
+					HAL_Delay(delai);
+					if(trigger>percentage){
+						trigger -= pas;
+						setPWM(trigger);
+					}
+					else{
+						trigger += pas;
+						setPWM(trigger);
+					}
+				}
+
 			}
 			else{
 				int uartTxStringLength = snprintf((char *)uartTxBuffer, UART_TX_BUFFER_SIZE, "Value must be between 0 and 100\r\n");
