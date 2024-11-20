@@ -47,7 +47,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-uint32_t value_adc;
+uint32_t buffer = 0x10;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -100,16 +100,9 @@ int main(void)
 	MX_USART2_UART_Init();
 	MX_USART3_UART_Init();
 	/* USER CODE BEGIN 2 */
-
 	Shell_Init();
-	HAL_ADC_Start_DMA(&hadc1,(uint32_t*)&value_adc,1);
+	HAL_ADC_Start_DMA(&hadc1,(uint32_t*)&buffer,1);
 
-	uint32_t adc_buffer[1]; // Tableau pour stocker les données ADC
-	float current_value = 0.0f; // Stocke la valeur calculée du courant
-
-	#define R_SHUNT 0.1f // Résistance de shunt en ohms
-	#define V_REF 3.3f   // Tension de référence de l'ADC
-	#define ADC_RESOLUTION 4096.0f // Résolution ADC 12 bits
 	/* USER CODE END 2 */
 
 	/* Infinite loop */
@@ -117,11 +110,6 @@ int main(void)
 	while (1)
 	{
 		Shell_Loop();
-		float voltage = (adc_buffer[0] * V_REF) / ADC_RESOLUTION;
-		current_value = voltage / R_SHUNT;
-
-		// Afficher ou utiliser `current_value` ici
-		HAL_Delay(500);
 		/* USER CODE END WHILE */
 
 		/* USER CODE BEGIN 3 */

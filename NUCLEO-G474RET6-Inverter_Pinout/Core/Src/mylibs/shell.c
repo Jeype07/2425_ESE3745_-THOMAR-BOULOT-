@@ -27,6 +27,9 @@ uint8_t uartRxReceived;
 uint8_t uartRxBuffer[UART_RX_BUFFER_SIZE];
 uint8_t uartTxBuffer[UART_TX_BUFFER_SIZE];
 
+extern  uint32_t buffer;
+uint32_t adc_val;
+
 char	 	cmdBuffer[CMD_BUFFER_SIZE];
 int 		idx_cmd;
 char* 		argv[MAX_ARGS];
@@ -149,6 +152,9 @@ void Shell_Loop(void){
 				HAL_UART_Transmit(&huart2, uartTxBuffer, uartTxStringLength, HAL_MAX_DELAY);
 			}
 		}
+		else if(strcmp(argv[0],"current")==0){
+					HAL_UART_Transmit(&huart2, buffer, 1, HAL_MAX_DELAY);
+		}
 		else{
 			HAL_UART_Transmit(&huart2, cmdNotFound, sizeof(cmdNotFound), HAL_MAX_DELAY);
 		}
@@ -162,15 +168,12 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef * huart){
 	HAL_UART_Receive_IT(&huart2, uartRxBuffer, UART_RX_BUFFER_SIZE);
 }
 
-void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc)
-{
-  /* Prevent unused argument(s) compilation warning */
-	adc_val = buffer;
 
-  /* NOTE : This function should not be modified. When the callback is needed,
-            function HAL_ADC_ConvCpltCallback must be implemented in the user file.
-   */
-}
+
+void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc)
+	{
+		adc_val = buffer;
+	}
 
 void setPWM(int dutycycle){
 	int val_CCR = (TIM1->ARR*dutycycle)/100;
