@@ -28,7 +28,7 @@ uint8_t uartRxBuffer[UART_RX_BUFFER_SIZE];
 uint8_t uartTxBuffer[UART_TX_BUFFER_SIZE];
 
 extern  uint32_t buffer;
-uint32_t adc_val;
+uint32_t adc_val = 0;
 
 char	 	cmdBuffer[CMD_BUFFER_SIZE];
 int 		idx_cmd;
@@ -41,7 +41,7 @@ int 		nbcommand = 4;
 int 		pas = 1;
 int 		delai = 100;
 int 		trigger = 50; //valeur du rapport après start
-int 		percentage;
+int 		percentage = 50;
 
 void Shell_Init(void){
 	memset(argv, 0, MAX_ARGS*sizeof(char*));
@@ -153,7 +153,10 @@ void Shell_Loop(void){
 			}
 		}
 		else if(strcmp(argv[0],"current")==0){
-					HAL_UART_Transmit(&huart2, buffer, 1, HAL_MAX_DELAY);
+			float voltage = V_REF * adc_val  / ADC_RESOLUTION;
+			float current = voltage - OFFSET / PRECISION;
+			int uartTxStringLength = snprintf((char *)uartTxBuffer, UART_TX_BUFFER_SIZE, "current : %f  %lu\r\n", current, adc_val);
+			HAL_UART_Transmit(&huart2, uartTxBuffer, uartTxStringLength, HAL_MAX_DELAY);
 		}
 		else{
 			HAL_UART_Transmit(&huart2, cmdNotFound, sizeof(cmdNotFound), HAL_MAX_DELAY);
@@ -171,9 +174,9 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef * huart){
 
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc)
-	{
-		adc_val = buffer;
-	}
+{
+	adc_val = buffer;
+}
 
 void setPWM(int dutycycle){
 	int val_CCR = (TIM1->ARR*dutycycle)/100;

@@ -17,6 +17,10 @@
 #define ASCII_BACK 0x08			// BACK = Backspace
 
 #define NULL_SPEED 50
+#define PRECISION 0.05f // Résistance de shunt en ohms
+#define V_REF 3.3f   // Tension de référence de l'ADC
+#define ADC_RESOLUTION 4096.0f // Résolution ADC 12 bits
+#define OFFSET 1.65f
 
 void Shell_Init(void);
 void Shell_Loop(void);
