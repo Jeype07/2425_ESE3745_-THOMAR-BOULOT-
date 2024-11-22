@@ -1,5 +1,14 @@
 # TP Actionneur
 
+Ce TP est réalisé par Jean-Philippe THOMAR et Paul Boulot, sous la supervision du professeur Alexis MARTIN. 
+
+## Objectifs
+A partir d'un hacheur complet et d'une carte Nucleo-STM32G474RE, nous allons  :
+- Réaliser un shell pour commander le hacheur,
+- Réaliser la commande des 4 transistors du hacheur en commande complémentaire décalée,
+- Faire l'acquisition des différents capteurs,
+- Réaliser l'asservissement en temps réel.
+
 ## Séance 1 : Commande MCC basique
 ### 1. Génération de 4 PWM
 
@@ -19,10 +28,10 @@ On veut un dead-time d'environ 100 ns donc on choisit x = 16
 
 ## Séance 2 : Commande en boucle ouverte, mesure de vitesse et de courant 
 
-### Commande de la vitesse 
+### 1. Commande de la vitesse 
 
-### Mesure de courant 
+### 2. Mesure de courant 
 
-### Mesure de la vitesse
+### 3. Mesure de la vitesse
 
  
