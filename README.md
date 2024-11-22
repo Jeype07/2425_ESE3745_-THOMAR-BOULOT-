@@ -2,7 +2,7 @@
 
 Ce TP est réalisé par Jean-Philippe THOMAR et Paul Boulot, sous la supervision du professeur Alexis MARTIN. 
 
-## Objectifs
+## Objectifs généraux 
 A partir d'un hacheur complet et d'une carte Nucleo-STM32G474RE, nous allons  :
 - Réaliser un shell pour commander le hacheur,
 - Réaliser la commande des 4 transistors du hacheur en commande complémentaire décalée,
@@ -11,7 +11,7 @@ A partir d'un hacheur complet et d'une carte Nucleo-STM32G474RE, nous allons  :
 
 ## Séance 1 : Commande MCC basique
 
-### Objectifs
+### Objectifs de la séance 
 
 - Générer 4 PWM en complémentaire décalée pour contrôler en boucle ouverte le moteur en respectant le cahier des charges,
 - Inclure le temps mort,
@@ -21,7 +21,7 @@ A partir d'un hacheur complet et d'une carte Nucleo-STM32G474RE, nous allons  :
 
 ### 1. Génération de 4 PWM
 
-#### Configurartion du dead-time
+#### Configuration du dead-time
 On a tDTS = 1/f_sysclk et x la valeur du dead time dans la configuration du timer 1 (comprise entre 0 et 255).  
 Si x <= 127 alors DT = x * tDTS.  
 Si 128 <= x <= 191 alors DT = (64+x[5:0]) * 2 * tDTS.  
