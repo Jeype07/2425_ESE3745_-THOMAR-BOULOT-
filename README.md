@@ -1,7 +1,7 @@
 # TP Actionneur
 
 ## Séance 1 : Commande MCC basique
-### Génération de 4 PWM
+### 1. Génération de 4 PWM
 
 #### Configurartion du dead-time
 On a tDTS = 1/f_sysclk et x la valeur du dead time dans la configuration du timer 1 (comprise entre 0 et 255).  
@@ -14,5 +14,15 @@ Ici tDTS = 1/170 MHz = 5.88 ns
 On veut un dead-time d'environ 100 ns donc on choisit x = 16
 
 
-### Commande de vitesse
-### Premiers tests
+### 2. Commande de vitesse
+### 3. Premiers tests
+
+## Séance 2 : Commande en boucle ouverte, mesure de vitesse et de courant 
+
+### Commande de la vitesse 
+
+### Mesure de courant 
+
+### Mesure de la vitesse
+
+ 
