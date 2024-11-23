@@ -38,10 +38,10 @@ char*		token;
 int 		newCmdReady = 0;
 char* 		command[4] = {"WhereisBrian?","start","stop","speed"};
 int 		nbcommand = 4;
-int 		pas = 1;
-int 		delai = 100;
-int 		trigger = 50; //valeur du rapport après start
-int 		percentage = 50;
+int 		pas = 1;		//pas de modification de la vitesse du moteur
+int 		delai = 100;	//delai entre chaque modification de vitesse du moteur en ms
+int 		trigger = 50; 	//valeur du rapport après start
+int 		percentage = 50;//valeur du rapport après start
 
 void Shell_Init(void){
 	memset(argv, 0, MAX_ARGS*sizeof(char*));
@@ -99,7 +99,7 @@ void Shell_Loop(void){
 
 		}
 
-		else if(strcmp(argv[0],"start")==0){
+		else if(strcmp(argv[0],"start")==0){	//lancement des PWM
 			int uartTxStringLength = snprintf((char *)uartTxBuffer, UART_TX_BUFFER_SIZE, "Power on\r\n");
 			HAL_UART_Transmit(&huart2, uartTxBuffer, uartTxStringLength, HAL_MAX_DELAY);
 			HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_1);
@@ -108,7 +108,7 @@ void Shell_Loop(void){
 			HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_2);
 			setPWM(NULL_SPEED);
 		}
-		else if(strcmp(argv[0],"stop")==0){
+		else if(strcmp(argv[0],"stop")==0){		//arrêt des PWM après arrêt progressif du moteur
 			int uartTxStringLength = snprintf((char *)uartTxBuffer, UART_TX_BUFFER_SIZE, "Power off\r\n");
 			HAL_UART_Transmit(&huart2, uartTxBuffer, uartTxStringLength, HAL_MAX_DELAY);
 			if(percentage != NULL_SPEED){
@@ -130,10 +130,10 @@ void Shell_Loop(void){
 			HAL_TIMEx_PWMN_Stop(&htim1, TIM_CHANNEL_2);
 		}
 
-		else if(argc == 2 && strcmp(argv[0], "speed") == 0){
+		else if(argc == 2 && strcmp(argv[0], "speed") == 0){	//commande de vitesse du moteur avec changement progressif
 			percentage = atoi(argv[1]);  // Convertit l'argument en pourcentage
 
-			if(percentage>=0 && percentage<=100){
+			if(percentage>=0 && percentage<=100){	//test sur la valeur de vitesse entrée
 
 				while(trigger!=percentage){
 					if(trigger>percentage){
@@ -152,7 +152,7 @@ void Shell_Loop(void){
 				HAL_UART_Transmit(&huart2, uartTxBuffer, uartTxStringLength, HAL_MAX_DELAY);
 			}
 		}
-		else if(strcmp(argv[0],"current")==0){
+		else if(strcmp(argv[0],"current")==0){		//commande pour demander l'affichage du courant
 			float voltage = V_REF * adc_val  / ADC_RESOLUTION;
 			float current = voltage - OFFSET / PRECISION;
 			int uartTxStringLength = snprintf((char *)uartTxBuffer, UART_TX_BUFFER_SIZE, "current : %f  %lu\r\n", current, adc_val);
@@ -178,7 +178,7 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc)
 	adc_val = buffer;
 }
 
-void setPWM(int dutycycle){
+void setPWM(int dutycycle){		//règle le rapport cyclique des PWM
 	int val_CCR = (TIM1->ARR*dutycycle)/100;
 	TIM1->CCR1=val_CCR;
 	TIM1->CCR2=TIM1->ARR-val_CCR;
