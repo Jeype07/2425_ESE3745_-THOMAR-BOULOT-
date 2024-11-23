@@ -34,11 +34,13 @@ Si 233 <= x <= 255 alors DT = (32+x[4:0]) * 16 * tDTS.
 Ici tDTS = 1/170 MHz = 5.88 ns  
 On veut un dead-time d'environ 100 ns donc on choisit x = 15
 
+Enfin, pour obtenir le décalage de T/2, on configure le comptage du timer 1 en "center aligned mode 1". Cependant en faisant cela on divise par deux la fréquence de nos PWM. On doit donc changer la configuration du timer pour double la fréquence et ainsi atteindre de nouveau 20kHz.
+
 <p align="center" > <img src="Images/PWM.png" width="100%" height="auto" /> </p>
-Figure 1. 4 PWM en complémentaire décalée
+Figure 2. 4 PWM en complémentaire décalée
 
 <p align="center"> <img src="Images/deadtime.png" width="100%" height="auto" /> </p>
-Figure 2. temps mort d'environ 100ns pour la commutation des transistors
+Figure 3. temps mort d'environ 100ns pour la commutation des transistors
 
 ### 2. Commande de vitesse
 ### 3. Premiers tests
