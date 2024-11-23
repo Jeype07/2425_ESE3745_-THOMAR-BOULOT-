@@ -129,7 +129,7 @@ else if(strcmp(argv[0],"stop")==0){		//arrêt des PWM après arrêt progressif d
 }
 ```
 
-speed XXXX permet de définir le rapport cyclique à XXXX/PWM_MAX
+speed XXXX permet de définir le rapport cyclique à XXXX/PWM_MAX. On établit une montée progressive de la vitesse en quelques secondes pour eviter les gros appels de courant. 
 
 ```C
 else if(argc == 2 && strcmp(argv[0], "speed") == 0){	//commande de vitesse du moteur avec changement progressif
