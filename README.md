@@ -84,8 +84,78 @@ Figure 7. Signal du moteur en marche avant avec un rapport cyclique de 60% (sign
 
 ## Séance 2 : Commande en boucle ouverte, mesure de vitesse et de courant 
 
-### 1. Commande de la vitesse 
+Dans cette partie nous allons  :
+- Commander en boucle ouverte le moteur avec une accélération limitée,
+- Mesurer le courant aux endroits adéquat dans le montage,
+- Mesurer la vitesse à partir du codeur présent sur chaque moteur.
 
+### 1. Commande de la vitesse 
+Nous rajoutons les command start, stop et speed XXXX dans notre projets 
+
+start permet de fixer le rapport cyclique à 50% (vitesse nulle) et d'activer la génération des pwm (HAL_TIM_PWM_Start et HAL_TIMEx_PWMN_Start)
+```C
+else if(strcmp(argv[0],"start")==0){	//lancement des PWM
+	int uartTxStringLength = snprintf((char *)uartTxBuffer, UART_TX_BUFFER_SIZE, "Power on\r\n");
+	HAL_UART_Transmit(&huart2, uartTxBuffer, uartTxStringLength, HAL_MAX_DELAY);
+	HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_1);
+	HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_1);
+	HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_2);
+	HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_2);
+	setPWM(NULL_SPEED);
+```
+stop permet de désactiver la génération des PWM
+
+```C
+else if(strcmp(argv[0],"stop")==0){		//arrêt des PWM après arrêt progressif du moteur
+	int uartTxStringLength = snprintf((char *)uartTxBuffer, UART_TX_BUFFER_SIZE, "Power off\r\n");
+	HAL_UART_Transmit(&huart2, uartTxBuffer, uartTxStringLength, HAL_MAX_DELAY);
+	if(percentage != NULL_SPEED){
+		while(percentage != NULL_SPEED){
+			if(percentage > NULL_SPEED){
+				percentage -= pas;
+				setPWM(percentage);
+			}
+			else{
+				percentage += pas;
+				setPWM(percentage);
+			}
+			HAL_Delay(delai);
+		}
+	}
+	HAL_TIM_PWM_Stop(&htim1,TIM_CHANNEL_1);
+	HAL_TIMEx_PWMN_Stop(&htim1, TIM_CHANNEL_1);
+	HAL_TIM_PWM_Stop(&htim1,TIM_CHANNEL_2);
+	HAL_TIMEx_PWMN_Stop(&htim1, TIM_CHANNEL_2);
+}
+```
+
+speed XXXX permet de définir le rapport cyclique à XXXX/PWM_MAX
+
+```C
+else if(argc == 2 && strcmp(argv[0], "speed") == 0){	//commande de vitesse du moteur avec changement progressif
+	//on vérifie que le nombre d'arguments est valide et que le premier porte le bon nom de commande
+	percentage = atoi(argv[1]);  // Convertit l'argument en pourcentage
+
+	if(percentage>=0 && percentage<=100){	//test sur la valeur de vitesse entrée avant de modifier la vitesse du moteur
+
+		while(trigger!=percentage){
+			if(trigger>percentage){
+				trigger -= pas;
+				setPWM(trigger);
+			}
+			else{
+				trigger += pas;
+				setPWM(trigger);
+			}
+			HAL_Delay(delai);
+		}
+	}
+	else{
+		int uartTxStringLength = snprintf((char *)uartTxBuffer, UART_TX_BUFFER_SIZE, "Value must be between 0 and 100\r\n");
+		HAL_UART_Transmit(&huart2, uartTxBuffer, uartTxStringLength, HAL_MAX_DELAY);
+	}
+}
+```
 ### 2. Mesure de courant 
 
 ### 3. Mesure de la vitesse
