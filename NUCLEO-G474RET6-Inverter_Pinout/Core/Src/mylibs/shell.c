@@ -131,9 +131,10 @@ void Shell_Loop(void){
 		}
 
 		else if(argc == 2 && strcmp(argv[0], "speed") == 0){	//commande de vitesse du moteur avec changement progressif
+			//on vérifie que le nombre d'arguments est valide et que le premier porte le bon nom de commande
 			percentage = atoi(argv[1]);  // Convertit l'argument en pourcentage
 
-			if(percentage>=0 && percentage<=100){	//test sur la valeur de vitesse entrée
+			if(percentage>=0 && percentage<=100){	//test sur la valeur de vitesse entrée avant de modifier la vitesse du moteur
 
 				while(trigger!=percentage){
 					if(trigger>percentage){
