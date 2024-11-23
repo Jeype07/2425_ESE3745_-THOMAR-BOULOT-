@@ -21,6 +21,9 @@ A partir d'un hacheur complet et d'une carte Nucleo-STM32G474RE, nous allons  :
 
 ### 1. Génération de 4 PWM
 
+#### Rôle du dead-time
+Afin de ne pas détruire les transistors du hacheur lors de la commutation de ces derniers, il est nécessaire de générer des signaux PWM avec un délai (les valeurs de la datasheet nous indiquent "turn off delay time 39ns" et "fall time 35ns"). On choisit donc de prendre une valeur de sécurité de 100ns pour nos dead-time.
+
 #### Configuration du dead-time
 On a tDTS = 1/f_sysclk et x la valeur du dead time dans la configuration du timer 1 (comprise entre 0 et 255).  
 Si x <= 127 alors DT = x * tDTS.  
@@ -29,8 +32,13 @@ Si 192 <= x <= 233 alors DT = (32+x[4:0]) * 8 * tDTS.
 Si 233 <= x <= 255 alors DT = (32+x[4:0]) * 16 * tDTS.  
 
 Ici tDTS = 1/170 MHz = 5.88 ns  
-On veut un dead-time d'environ 100 ns donc on choisit x = 16
+On veut un dead-time d'environ 100 ns donc on choisit x = 15
 
+<p align="center" > <img src="Images/PWM.png" width="100%" height="auto" /> </p>
+Figure 1. 4 PWM en complémentaire décalée
+
+<p align="center"> <img src="Images/deadtime.png" width="100%" height="auto" /> </p>
+Figure 2. temps mort d'environ 100ns pour la commutation des transistors
 
 ### 2. Commande de vitesse
 ### 3. Premiers tests
