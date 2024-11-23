@@ -34,14 +34,53 @@ Si 233 <= x <= 255 alors DT = (32+x[4:0]) * 16 * tDTS.
 Ici tDTS = 1/170 MHz = 5.88 ns  
 On veut un dead-time d'environ 100 ns donc on choisit x = 15
 
+Enfin, pour obtenir le décalage de T/2, on configure le comptage du timer 1 en "center aligned mode 1". Cependant en faisant cela on divise par deux la fréquence de nos PWM. On doit donc changer la configuration du timer pour double la fréquence et ainsi atteindre de nouveau 20kHz. ARR = 4250 (car 170M/4250 = 40kHz)
+<p align="center" > <img src="Images/Counter.png" width="100%" height="auto" /> </p>
+Figure 1. Schéma comptage aligné centré
+
+<p align="center" > <img src="Images/configTIM1.png" width="100%" height="auto" /> </p>
+Figure 2. 4 Configuration TIM1
+
 <p align="center" > <img src="Images/PWM.png" width="100%" height="auto" /> </p>
-Figure 1. 4 PWM en complémentaire décalée
+Figure 3. 4 PWM en complémentaire décalé
 
 <p align="center"> <img src="Images/deadtime.png" width="100%" height="auto" /> </p>
-Figure 2. temps mort d'environ 100ns pour la commutation des transistors
+Figure 4. Temps mort d'environ 100ns pour la commutation des transistors
 
 ### 2. Commande de vitesse
+Code de la commande de vitesse
+```C
+else if(argc == 2 && strcmp(argv[0], "speed") == 0){	//commande de vitesse du moteur avec changement progressif
+			//on vérifie que le nombre d'arguments est valide et que le premier porte le bon nom de commande
+			percentage = atoi(argv[1]);  // Convertit l'argument en pourcentage
+
+			if(percentage>=0 && percentage<=100){	//test sur la valeur de vitesse entrée avant de modifier la vitesse du moteur
+
+				while(trigger!=percentage){
+					if(trigger>percentage){
+						trigger -= pas;
+						setPWM(trigger);
+					}
+					else{
+						trigger += pas;
+						setPWM(trigger);
+					}
+					HAL_Delay(delai);
+				}
+			}
+}
+```
+La fonction atoi() permet de convertir le deuxième argument en entier afin de l'utiliser pour fixer la vitesse du moteur.
+
 ### 3. Premiers tests
+<p align="center"> <img src="Images/reverse30.png" width="100%" height="auto" /> </p>
+Figure 5. Signal du moteur en marche arrière avec un rapport cyclique de 30% (signal jaune)
+
+<p align="center"> <img src="Images/reverse40.png" width="100%" height="auto" /> </p>
+Figure 6. Signal du moteur en marche arrière avec un rapport cyclique de 40% (signal jaune)
+
+<p align="center"> <img src="Images/forward60.png" width="100%" height="auto" /> </p>
+Figure 7. Signal du moteur en marche avant avec un rapport cyclique de 60% (signal jaune)
 
 ## Séance 2 : Commande en boucle ouverte, mesure de vitesse et de courant 
 
