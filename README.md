@@ -21,6 +21,13 @@ A partir d'un hacheur complet et d'une carte Nucleo-STM32G474RE, nous allons  :
 
 ### 1. Génération de 4 PWM
 
+Nous allons générer quatre PWM sur les bras de pont U et V pour controler le hacheur.  
+
+Cahier des charges :  
+- Fréquence de la PWM : 20kHz  
+- Temps mort minimum : à voir selon la datasheet des transistors (faire valider la valeur)  
+- Résolution minimum : 10 bits.  
+
 #### Rôle du dead-time
 Afin de ne pas détruire les transistors du hacheur lors de la commutation de ces derniers, il est nécessaire de générer des signaux PWM avec un délai (les valeurs de la datasheet nous indiquent "turn off delay time 39ns" et "fall time 35ns"). On choisit donc de prendre une valeur de sécurité de 100ns pour nos dead-time.
 
@@ -157,6 +164,17 @@ else if(argc == 2 && strcmp(argv[0], "speed") == 0){	//commande de vitesse du mo
 }
 ```
 ### 2. Mesure de courant 
+
+Les courants qui doivent être mesurés sont :   
+- Bus_Imes : courant du bus d'alimentation (pin PC2)  
+- U_Imes : courant dans le bras de pont U (pin PA1)  
+- V_Imes : courant dans le bras de pont V  (pin PB1)  
+
+Nous faisons d’abord une mesure de courant en pooling  
+
+Pour convertir la valeur renvoyée par l’ADC en intensité de courant, on utilise la formule suivante (basée sur la datasheet) :  
+voltage = (adc_value * 3.3) / 4095  
+current = (voltage - 1.65) / 0.08  
 
 ### 3. Mesure de la vitesse
 
