@@ -28,6 +28,9 @@ Cahier des charges :
 - Définir un temps mort minimum  
 - Résolution minimum : 10 bits  
 
+#### Configuration du timer TIM1
+Pour que nos PWM soit à la fréquence de 20kHz, on configure le registre ARR du timer 1 avec la valeur 8500-1 (car 170M/8500 = 20kHz) et un prescaler à 0.
+
 #### Rôle du dead-time
 Afin de ne pas détruire les transistors du hacheur lors de la commutation de ces derniers, il est nécessaire de générer des signaux PWM avec un délai (les valeurs de la datasheet nous indiquent "turn off delay time 39ns" et "fall time 35ns"). On choisit donc de prendre une valeur de sécurité de 100ns pour nos dead-time.
 
@@ -41,7 +44,8 @@ Si 233 <= x <= 255 alors DT = (32+x[4:0]) * 16 * tDTS.
 Ici tDTS = 1/170 MHz = 5.88 ns  
 On veut un dead-time d'environ 100 ns donc on choisit x = 15
 
-Enfin, pour obtenir le décalage de T/2, on configure le comptage du timer 1 en "center aligned mode 1". Cependant en faisant cela on divise par deux la fréquence de nos PWM. On doit donc changer la configuration du timer pour double la fréquence et ainsi atteindre de nouveau 20kHz. ARR = 4250 (car 170M/4250 = 40kHz)
+#### Commande complémentaire décalée
+Enfin, pour obtenir le décalage de T/2, on configure le comptage du timer 1 en "center aligned mode 1". Cependant en faisant cela on divise par deux la fréquence de nos PWM. On doit donc changer la configuration du timer pour double la fréquence et ainsi atteindre de nouveau 20kHz. ARR = 4250-1 (car 170M/4250 = 40kHz)
 <p align="center" > <img src="Images/Counter.png" width="100%" height="auto" /> </p>
 Figure 1. Schéma comptage aligné centré
 
@@ -170,12 +174,14 @@ Les courants qui doivent être mesurés sont :
 - U_Imes : courant dans le bras de pont U (pin PA1)  
 - V_Imes : courant dans le bras de pont V  (pin PB1)  
 
+#### Mesure par pooling
 Nous faisons d’abord une mesure de courant en pooling  
 
 Pour convertir la valeur renvoyée par l’ADC en intensité de courant, on utilise la formule suivante (basée sur la datasheet) :  
-voltage = (adc_value * 3.3) / 4095  
+voltage = (adc_value * 3.3) / 4096  
 current = (voltage - 1.65) / 0.08  
 
+On divise la valeur de voltage par 4096 car on nous demande une précision sur 12 bits (2^12=4096).
 ```C
 else if(strcmp(argv[0],"currentpool")==0){
 	HAL_ADC_Start(&hadc1);
@@ -192,6 +198,36 @@ else if(strcmp(argv[0],"currentpool")==0){
 	HAL_UART_Transmit(&huart2, uartTxBuffer, uartTxStringLength, HAL_MAX_DELAY);
 }
 ```
+
+#### Mesure en utilisant le DMA
+
+Dans l'ioc on doit ajouter dans DMA Setting de l'adc1 la requête suivante
+![image](https://github.com/user-attachments/assets/faeddc77-a1b2-453b-8bc6-c926b8b6d88d)
+
+Pour lancer le DMA, on ajout la ligne suivante dans l'initialisation des périphériques dans le fichier main.
+Le DMA va affecter la valeur de l'adc à la variable buffer à chaque mesure.
+```C
+HAL_ADC_Start_DMA(&hadc1,(uint32_t*)&buffer,1);
+```
+
+On utilise ensuite la fonction de callback de l'adc pour mettre à jour la variable globale adc_val avec la valeur de la variable buffer qui est remplie par le DMA
+```C
+void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc)
+{
+	adc_val = buffer;
+}
+```
+
+On peut ensuite utilisé la mesure dans le shell
+```C
+else if(strcmp(argv[0],"current")==0){		//commande pour demander l'affichage du courant
+			float voltage = V_REF * adc_val  / ADC_RESOLUTION;
+			float current = voltage - OFFSET / PRECISION;
+			int uartTxStringLength = snprintf((char *)uartTxBuffer, UART_TX_BUFFER_SIZE, "current : %f \r\n", current);
+			HAL_UART_Transmit(&huart2, uartTxBuffer, uartTxStringLength, HAL_MAX_DELAY);
+		}
+```
+
 ### 3. Mesure de la vitesse
 
  
