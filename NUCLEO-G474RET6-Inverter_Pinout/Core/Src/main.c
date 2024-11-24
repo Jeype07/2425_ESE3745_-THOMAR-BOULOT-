@@ -47,7 +47,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-uint32_t buffer = 0x10;
+uint32_t buffer = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/

@@ -156,7 +156,7 @@ void Shell_Loop(void){
 		else if(strcmp(argv[0],"current")==0){		//commande pour demander l'affichage du courant
 			float voltage = V_REF * adc_val  / ADC_RESOLUTION;
 			float current = voltage - OFFSET / PRECISION;
-			int uartTxStringLength = snprintf((char *)uartTxBuffer, UART_TX_BUFFER_SIZE, "current : %f  %lu\r\n", current, adc_val);
+			int uartTxStringLength = snprintf((char *)uartTxBuffer, UART_TX_BUFFER_SIZE, "current : %f \r\n", current);
 			HAL_UART_Transmit(&huart2, uartTxBuffer, uartTxStringLength, HAL_MAX_DELAY);
 		}
 		else{
