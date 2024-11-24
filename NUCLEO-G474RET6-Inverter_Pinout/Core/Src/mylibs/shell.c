@@ -29,6 +29,7 @@ uint8_t uartTxBuffer[UART_TX_BUFFER_SIZE];
 
 extern  uint32_t buffer;
 uint32_t adc_val = 0;
+extern ADC_HandleTypeDef hadc1;
 
 char	 	cmdBuffer[CMD_BUFFER_SIZE];
 int 		idx_cmd;
@@ -159,6 +160,22 @@ void Shell_Loop(void){
 			int uartTxStringLength = snprintf((char *)uartTxBuffer, UART_TX_BUFFER_SIZE, "current : %f \r\n", current);
 			HAL_UART_Transmit(&huart2, uartTxBuffer, uartTxStringLength, HAL_MAX_DELAY);
 		}
+
+		else if(strcmp(argv[0],"currentpool")==0){
+			HAL_ADC_Start(&hadc1);
+			uint32_t adc_value = 0;
+			float voltage = 0.0f;
+			float current = 0.0f;
+			if (HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY) == HAL_OK) {
+				adc_value = HAL_ADC_GetValue(&hadc1);
+				voltage = (adc_value * ADC_VREF) / ADC_RESOLUTION;
+				current = (voltage - ADC_V_OFFSET) / ADC_NOMINAL_SENSITIVITY;
+			}
+			HAL_ADC_Stop(&hadc1);
+			int uartTxStringLength = snprintf((char *)uartTxBuffer, UART_TX_BUFFER_SIZE, "current : %f A\r\n", current);
+			HAL_UART_Transmit(&huart2, uartTxBuffer, uartTxStringLength, HAL_MAX_DELAY);
+		}
+
 		else{
 			HAL_UART_Transmit(&huart2, cmdNotFound, sizeof(cmdNotFound), HAL_MAX_DELAY);
 		}

@@ -22,6 +22,11 @@
 #define ADC_RESOLUTION 4096.0f // Résolution ADC 12 bits
 #define OFFSET 1.65f
 
+#define ADC_NOMINAL_SENSITIVITY 0.080f
+#define ADC_VREF 3.3f
+#define ADC_V_OFFSET 1.65f
+
+
 void Shell_Init(void);
 void Shell_Loop(void);
 void setPWM(int dutycycle);
